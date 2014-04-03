@@ -1,5 +1,6 @@
 package POEx::Weather::OpenWeatherMap;
 
+use Carp;
 use strictures 1;
 use feature 'state';
 
@@ -27,6 +28,14 @@ has api_key => (
   isa         => Str,
 );
 
+has units => (
+  lazy        => 1,
+  is          => 'ro',
+  writer      => 'set_units',
+  isa         => Str,
+  builder     => sub { 'imperial' },
+);
+
 sub ua_alias {
   my ($self) = @_;
   $self->alias ? $self->alias . 'UA' : ()
@@ -35,22 +44,23 @@ sub ua_alias {
 
 sub query_url_byname {
   my ($self, @parts) = @_;
-  uri_escape_utf8 join ',', 
-    'http://api.openweathermap.org/data/2.5/weather?q=',
-    @parts
+  'http://api.openweathermap.org/data/2.5/weather?q='
+    . join(',', map {; uri_escape_utf8($_) } @parts)
+    . '&units=' . $self->units
 }
 
 sub query_url_bycode {
   my ($self, $code) = @_;
-  uri_escape_utf8 join '', 
-    'api.openweathermap.org/data/2.5/weather?id=',
-    $code
+  'api.openweathermap.org/data/2.5/weather?id='
+    . uri_escape_utf8($code)
+    . '&units=' . $self->units
 }
 
 sub query_url_bycoord {
-  my ($self, $lat, $long) = @_;
-  uri_escape_utf8
-    "api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long"
+  my $self = shift;
+  my ($lat, $long) = map {; uri_escape_utf8($_) } @_;
+  "api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long"
+    . '&units=' . $self->units
 }
 
 
@@ -59,11 +69,11 @@ sub start {
   $self->set_object_states(
     [
       $self => +{
-        'emitter_started'  => 'mxrp_emitter_started',
-        'emitter_stopped'  => 'mxrp_emitter_stopped',
+        emitter_started  => 'mxrp_emitter_started',
+        emitter_stopped  => 'mxrp_emitter_stopped',
 
-        'get_weather'      => 'mxrp_get_weather',
-        'http_response'    => 'mxrp_response',
+        get_weather      => 'mxrp_get_weather',
+        http_response    => 'mxrp_response',
 
         # FIXME cache check/expiry timer
       },
@@ -101,6 +111,17 @@ sub get_weather {
 sub mxrp_get_weather {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
+
+  unless ($args{location}) {
+    carp "Expected 'location =>' parameter";
+    $self->emit( error => +{
+        request => 
+          +{ tag => $args{tag}, location => undef, ts => time }->inflate,
+        status  => "Missing 'location =>' in query",
+      }->inflate
+    );
+    return
+  }
 
   my $my_request = +{
     tag       => $args{tag},
@@ -140,7 +161,7 @@ sub _prepare_request {
     $url = $self->query_url_byname(@parts);
   }
 
-  my $req = HTTP::Request->new( GET => uri_escape_utf8($url) );
+  my $req = HTTP::Request->new( GET => $url );
   $req->header( 'x-api-key' => $self->api_key );
 
   $req
