@@ -1,6 +1,7 @@
 package POEx::Weather::OpenWeatherMap;
 
 use strictures 1;
+use feature 'state';
 
 use JSON::Tiny;
 use Try::Tiny;
@@ -120,21 +121,26 @@ sub _prepare_request {
 
   my $str = $my_request->location;
 
+  state $latlong = 
+    qr{\Alat(?:itude)?\s+?([0-9]+)\s+?long?(?:itude)?\s+?([0-9]+)};
+
   my $url;
   URL: {
-    if (is_Int $str) {
-      # Try for city ID
+    if (is_StrictNum $str) {
+      $url = $self->query_url_bycode($str);
       last URL
     }
 
-    # FIXME  lat/long syntax?
-    # FIXME else assume city name search
-  }
-  # FIXME parse $str, prepare appropriate HTTP::Request
-  # FIXME add x-api-key header
-  # FIXME return request obj for UA
+    if (my ($lat, $lon) = $str =~ $latlong) {
+      $url = $self->query_url_bycoord($lat, $lon);
+      last URL
+    }
 
-  my $req = HTTP::Request->new(GET => $url);
+    my @parts = split /,\s+?/, $str;
+    $url = $self->query_url_byname(@parts);
+  }
+
+  my $req = HTTP::Request->new( GET => uri_escape_utf8($url) );
   $req->header( 'x-api-key' => $self->api_key );
 
   $req
@@ -147,21 +153,40 @@ sub mxrp_response {
   my ($http_response)             = @{ $_[ARG1] };
 
   unless ($http_response->is_success) {
-    # FIXME ->emit an error
+    my $err = +{
+      request => $my_request,
+      status  => 'HTTP: '.$http_response->status_line,
+    }->inflate;
+    $self->emit( error => $err );
     return
   }
   my $content = $http_response->content;
   my $data = $self->_decode_response($content, $my_request);
   return unless $data;
 
-  # FIXME _decode_response & emit weather_response
-  # FIXME caching
+  my $my_response = +{
+    request => $my_request,
+    weather => $data,
+    json    => $content,
+  }->inflate;
+
+  $self->emit( weather => $my_response );
+  # FIXME cache response
 }
 
 sub _decode_response {
   my ($self, $raw, $my_request) = @_;
-  # FIXME try{} to decode JSON
-  # else ->emit an error 
+
+  my $data = try { JSON::Tiny->new->decode($raw) } catch {
+    my $err = +{
+      request => $my_request,
+      status  => 'JSON: '.$_,
+    }->inflate;
+    $self->emit( error => $err );
+    undef
+  } or return;
+
+  $data
 }
 
 1;
