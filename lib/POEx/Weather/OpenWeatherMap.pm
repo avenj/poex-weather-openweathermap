@@ -113,7 +113,7 @@ sub mxrp_get_weather {
   my %args = @_[ARG0 .. $#_];
 
   unless ($args{location}) {
-    carp "Expected 'location =>' parameter";
+    warn "Expected 'location =>' parameter in get_weather request\n";
     $self->emit( error => +{
         request => 
           +{ tag => $args{tag}, location => undef, ts => time }->inflate,
@@ -184,6 +184,20 @@ sub mxrp_response {
   my $content = $http_response->content;
   my $data = $self->_decode_response($content, $my_request);
   return unless $data;
+
+  unless ( (my $code = $data->{cod} // '') eq '200') {
+    my $msg = $data->{message} || 'Unknown error';
+    $self->emit( error => +{
+        request => $my_request,
+        status  => "OpenWeatherMap: $code: $msg",
+      }->inflate
+    );
+    return
+  }
+
+  ## FIXME
+  ## http://bugs.openweathermap.org/projects/api/wiki/Weather_Data
+  ##   try to add some sanity wrt optional values
 
   my $my_response = +{
     request => $my_request,
