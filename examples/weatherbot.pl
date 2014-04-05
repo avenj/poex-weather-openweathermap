@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-use Carp;
 use strictures 1;
+use Carp;
 use 5.10.0;
 
 use List::Objects::WithUtils;
@@ -66,6 +66,7 @@ sub _start {
   $_[HEAP]->{wx} = POEx::Weather::OpenWeatherMap->new(
     event_prefix => 'pwx_',
     api_key => getopts->api_key,
+    units   => 'imperial',
   );
   $_[HEAP]->{wx}->start;
 }
@@ -102,7 +103,7 @@ sub pwx_error {
     my $chan = $req->{tag};
     $_[HEAP]->{irc}->privmsg($chan => "Err: $status");
   }
-  carp $status;
+  warn "Err: $status";
 }
 
 sub pwx_weather {
@@ -113,17 +114,19 @@ sub pwx_weather {
 
   my $place = $data->{name};
   
+  # FIXME sanity checks belong in lib
   my $main = $data->{main};
   my $temp = int $main->{temp};
-  my $temp_lo = int $main->{temp_min};
-  my $temp_hi = int $main->{temp_max};
+  my $temp_lo = int( $main->{temp_min} // $temp);
+  my $temp_hi = int( $main->{temp_max} // $temp);
   my $humid   = $main->{humidity};
 
   my $wind_now  = $data->{wind}->{speed};
-  my $wind_gust = $data->{wind}->{gust};
+  my $wind_gust = $data->{wind}->{gust} // $wind_now;
 
-  my $weather = shift @{ $data->{weather} };
-  my $desc = $weather->{description};
+  my $weather = shift @{ $data->{weather} // [] };
+  my $desc = $weather ? $weather->{description} : undef;
+  $desc = 'unknown conditions' unless defined $desc;
 
   my $str = 
     "($place) ${temp}F (${temp_lo}F/${temp_hi}F lo/hi)"
