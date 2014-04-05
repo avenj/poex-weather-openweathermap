@@ -51,7 +51,7 @@ sub query_url_byname {
 
 sub query_url_bycode {
   my ($self, $code) = @_;
-  'api.openweathermap.org/data/2.5/weather?id='
+  'http://api.openweathermap.org/data/2.5/weather?id='
     . uri_escape_utf8($code)
     . '&units=' . $self->units
 }
@@ -59,7 +59,7 @@ sub query_url_bycode {
 sub query_url_bycoord {
   my $self = shift;
   my ($lat, $long) = map {; uri_escape_utf8($_) } @_;
-  "api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long"
+  "http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long"
     . '&units=' . $self->units
 }
 
@@ -143,7 +143,7 @@ sub _prepare_request {
   my $str = $my_request->location;
 
   state $latlong = 
-    qr{\Alat(?:itude)?\s+?([0-9]+)\s+?long?(?:itude)?\s+?([0-9]+)};
+    qr{\Alat(?:itude)?\s+?(-?[0-9.]+),?\s+?long?(?:itude)?\s+?(-?[0-9.]+)};
 
   my $url;
   URL: {
