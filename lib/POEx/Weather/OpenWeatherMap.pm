@@ -4,7 +4,6 @@ use Carp;
 use strictures 1;
 use feature 'state';
 
-use JSON::Tiny;
 use Try::Tiny;
 
 use Lowu;   # autoboxed lists
@@ -12,10 +11,14 @@ use List::Objects::Types -all;
 use Types::Standard      -all;
 
 use HTTP::Request;
-use URI::Escape 'uri_escape_utf8';
 
 use POE;
 use POE::Component::Client::HTTP;
+
+
+use POEx::Weather::OpenWeatherMap::Error;
+use POEx::Weather::OpenWeatherMap::Request;
+use POEx::Weather::OpenWeatherMap::Result;
 
 
 use Moo; use MooX::late;
@@ -29,6 +32,7 @@ has api_key => (
 );
 
 has units => (
+  ## FIXME feed me to Requests
   lazy        => 1,
   is          => 'ro',
   writer      => 'set_units',
@@ -39,28 +43,6 @@ has units => (
 sub ua_alias {
   my ($self) = @_;
   $self->alias ? $self->alias . 'UA' : ()
-}
-
-
-sub query_url_byname {
-  my ($self, @parts) = @_;
-  'http://api.openweathermap.org/data/2.5/weather?q='
-    . join(',', map {; uri_escape_utf8($_) } @parts)
-    . '&units=' . $self->units
-}
-
-sub query_url_bycode {
-  my ($self, $code) = @_;
-  'http://api.openweathermap.org/data/2.5/weather?id='
-    . uri_escape_utf8($code)
-    . '&units=' . $self->units
-}
-
-sub query_url_bycoord {
-  my $self = shift;
-  my ($lat, $long) = map {; uri_escape_utf8($_) } @_;
-  "http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long"
-    . '&units=' . $self->units
 }
 
 
@@ -89,6 +71,14 @@ sub stop {
   $self->_shutdown_emitter
 }
 
+sub _emit_error {
+  my ($self, %args) = @_;
+  $args{request} = $args{request}->inflate if is_HashRef($args{request});
+  $self->emit( error => 
+    POEx::Weather::OpenWeatherMap::Error->new(%args)
+  )
+}
+
 
 sub mxrp_emitter_started {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
@@ -113,55 +103,35 @@ sub mxrp_get_weather {
   my %args = @_[ARG0 .. $#_];
 
   unless ($args{location}) {
-    warn "Expected 'location =>' parameter in get_weather request\n";
-    $self->emit( error => +{
-        request => 
-          +{ tag => $args{tag}, location => undef, ts => time }->inflate,
-        status  => "Missing 'location =>' in query",
-      }->inflate
+    warn "Missing 'location =>' in query\n";
+    my $fake_req = POEx::Weather::OpenWeatherMap::Request->new(
+      tag      => $args{tag},
+      location => '',
+    );
+    $self->_emit_error(
+      request => $fake_req,
+      status  => "Missing 'location =>' in query",
     );
     return
   }
 
-  my $my_request = +{
-    tag       => $args{tag},
-    location  => $args{location},
-    ts        => time,
-  }->inflate;
+  # FIXME request objs should be for current or forecast (subclasses?)
+
+  my $my_request = POEx::Weather::OpenWeatherMap::Request->new(%args);
 
   # FIXME caching
 
   $kernel->post( $self->ua_alias => request => http_response =>
-    $self->_prepare_request($my_request),
+    $self->_prepare_http_request($my_request),
     $my_request
   );
 }
 
-sub _prepare_request {
+
+sub _prepare_http_request {
   my ($self, $my_request) = @_;
 
-  my $str = $my_request->location;
-
-  state $latlong = 
-    qr{\Alat(?:itude)?\s+?(-?[0-9.]+),?\s+?long?(?:itude)?\s+?(-?[0-9.]+)};
-
-  my $url;
-  URL: {
-    if (is_StrictNum $str) {
-      $url = $self->query_url_bycode($str);
-      last URL
-    }
-
-    if (my ($lat, $lon) = $str =~ $latlong) {
-      $url = $self->query_url_bycoord($lat, $lon);
-      last URL
-    }
-
-    my @parts = split /,\s+?/, $str;
-    $url = $self->query_url_byname(@parts);
-  }
-
-  my $req = HTTP::Request->new( GET => $url );
+  my $req = HTTP::Request->new( GET => $my_request->url );
   $req->header( 'x-api-key' => $self->api_key );
 
   $req
@@ -170,27 +140,32 @@ sub _prepare_request {
 sub mxrp_response {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
+  ## FIXME OO API
+
+  ## FIXME handle forecast or regular resp
+  ##  dispatch to appropriate response handler
+
   my ($http_request, $my_request) = @{ $_[ARG0] };
   my ($http_response)             = @{ $_[ARG1] };
 
   unless ($http_response->is_success) {
-    my $err = +{
+    $self->_emit_error(
       request => $my_request,
       status  => 'HTTP: '.$http_response->status_line,
-    }->inflate;
-    $self->emit( error => $err );
+    );
     return
   }
-  my $content = $http_response->content;
-  my $data = $self->_decode_response($content, $my_request);
-  return unless $data;
 
-  unless ( (my $code = $data->{cod} // '') eq '200') {
-    my $msg = $data->{message} || 'Unknown error';
-    $self->emit( error => +{
-        request => $my_request,
-        status  => "OpenWeatherMap: $code: $msg",
-      }->inflate
+  my $content = $http_response->content;
+  my $my_response = POEx::Weather::OpenWeatherMap::Result->new(
+    request => $my_request,
+    json    => $content,
+  );
+  
+  unless ($my_response->is_success) {
+    $self->_emit_error(
+      request => $my_request,
+      status  => "OpenWeatherMap: $code: ".$my_response->error,
     );
     return
   }
@@ -198,12 +173,7 @@ sub mxrp_response {
   ## FIXME
   ## http://bugs.openweathermap.org/projects/api/wiki/Weather_Data
   ##   try to add some sanity wrt optional values
-
-  my $my_response = +{
-    request => $my_request,
-    weather => $data,
-    json    => $content,
-  }->inflate;
+  ##   maybe an actual class for these:
 
   $self->emit( weather => $my_response );
   # FIXME cache response
