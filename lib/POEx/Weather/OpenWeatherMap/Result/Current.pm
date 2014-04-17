@@ -14,109 +14,73 @@ use POEx::Weather::OpenWeatherMap::Units qw/
 /;
 
 
+sub lazy_for {
+  my $type = shift;
+  ( lazy => 1, is => 'ro', isa => $type, @_ )
+}
+
+
 use Moo; use MooX::late;
 extends 'POEx::Weather::OpenWeatherMap::Result';
 
 
-has dt => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => DateTimeUTC,
+has dt => ( lazy_for DateTimeUTC,
   builder   => sub { shift->data->{dt} },
 );
 
-has id   => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has id   => ( lazy_for Int,
   builder   => sub { shift->data->{id} },
 );
 
-has name => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Str,
+has name => ( lazy_for Str,
   builder   => sub { shift->data->{name} },
 );
 
-has country => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Str,
+has country => ( lazy_for Str,
   builder   => sub { shift->data->{sys}->{country} // '' },
 );
 
-has station => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Str,
+has station => ( lazy_for Str,
   builder   => sub { shift->data->{base} // '' },
 );
 
 
-has latitude => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
+has latitude => ( lazy_for StrictNum,
   builder   => sub { shift->data->{coord}->{lat} },
 );
 
-has longitude => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
+has longitude => ( lazy_for StrictNum,
   builder   => sub { shift->data->{coord}->{lon} },
 );
 
 
-has temp_f => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has temp_f => ( lazy_for Int,
   builder   => sub { int( shift->data->{main}->{temp} ) },
 );
 
-has temp_c => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
-  builder   => sub { f_to_c( shift->temp_f ) },
+has temp_c => ( lazy_for Int,
+  builder   => sub { int f_to_c( shift->temp_f ) },
 );
 
 
-has humidity => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has humidity => ( lazy_for Int,
   builder   => sub { int( shift->data->{main}->{humidity} // 0 ) },
 );
 
-has pressure => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
+has pressure => ( lazy_for StrictNum,
   builder   => sub { shift->data->{main}->{pressure} },
 );
 
-has cloud_coverage => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has cloud_coverage => ( lazy_for Int,
   builder   => sub { int( shift->data->{clouds}->{all} // 0 ) },
 );
 
 
-has sunrise => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => DateTimeUTC,
+has sunrise => ( lazy_for DateTimeUTC,
   builder   => sub { shift->data->{sys}->{sunrise} // 0 },
 );
 
-has sunset => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => DateTimeUTC,
+has sunset => ( lazy_for DateTimeUTC,
   builder   => sub { shift->data->{sys}->{sunset} // 0 },
 );
 
@@ -128,10 +92,7 @@ sub _so_weather_maybe {
   $weather->[0]
 }
 
-has conditions_terse => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Str,
+has conditions_terse => ( lazy_for Str,
   builder   => sub {
     my ($self) = @_;
     my $weather = $self->_so_weather_maybe || return '';
@@ -139,10 +100,7 @@ has conditions_terse => (
   },
 );
 
-has conditions_description => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Str,
+has conditions_description => ( lazy_for Str,
   builder   => sub {
     my ($self) = @_;
     my $weather = $self->_so_weather_maybe || return '';
@@ -150,10 +108,7 @@ has conditions_description => (
   },
 );
 
-has conditions_code => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has conditions_code => ( lazy_for Int,
   builder   => sub {
     my ($self) = @_;
     my $weather = $self->_so_weather_maybe || return 0;
@@ -161,10 +116,7 @@ has conditions_code => (
   },
 );
 
-has conditions_icon => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Maybe[Str],
+has conditions_icon => ( lazy_for Maybe[Str],
   builder   => sub {
     my ($self) = @_;
     my $weather = $self->_so_weather_maybe || return;
@@ -173,49 +125,32 @@ has conditions_icon => (
 );
 
 
-has wind_speed => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has wind_speed => ( lazy_for Int,
   builder   => sub { int( shift->data->{wind}->{speed} // 0 ) },
 );
 
-has wind_speed_kph => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Int,
+has wind_speed_kph => ( lazy_for Int,
   builder   => sub { int( mph_to_kph shift->wind_speed ) },
 );
 
-has wind_direction_degrees => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
+has wind_direction_degrees => ( lazy_for StrictNum,
   builder   => sub { shift->data->{wind}->{deg} // 0 },
 );
 
-has wind_direction => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => Str,
+has wind_direction => ( lazy_for Str,
   builder   => sub { deg_to_compass( shift->wind_direction_degrees ) },
 );
 
-has wind_gust => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
+has wind_gust => ( lazy_for Int,
   builder   => sub {
     my ($self) = @_;
-    my $gust = $self->data->{wind}->{gust};
+    my $gust = int( $self->data->{wind}->{gust} // 0 );
     return 0 unless $gust and $gust ne $self->wind_speed;
+    $gust
   },
 );
 
-has wind_gust_kph => (
-  lazy      => 1,
-  is        => 'ro',
-  isa       => StrictNum,
+has wind_gust_kph => ( lazy_for Int,
   builder   => sub { int( mph_to_kph shift->wind_gust ) },
 );
 
