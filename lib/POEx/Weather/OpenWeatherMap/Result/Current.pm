@@ -149,7 +149,7 @@ has wind_gust_mph => ( lazy_for Int,
   builder   => sub {
     my ($self) = @_;
     my $gust = int( $self->data->{wind}->{gust} // 0 );
-    return 0 unless $gust and $gust ne $self->wind_speed_mph;
+    return 0 unless $gust and $gust > $self->wind_speed_mph;
     $gust
   },
 );
