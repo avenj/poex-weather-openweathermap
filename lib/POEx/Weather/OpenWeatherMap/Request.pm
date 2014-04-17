@@ -1,7 +1,8 @@
 package POEx::Weather::OpenWeatherMap::Request;
 
-use strictures 1;
 use v5.10;
+use strictures 1;
+use Carp;
 
 use Types::Standard -all;
 use Types::DateTime -all;
@@ -10,6 +11,13 @@ use HTTP::Request;
 use URI::Escape 'uri_escape_utf8';
 
 use Moo; use MooX::late;
+
+sub new_for {
+  my ($class, $type) = splice @_, 0, 2;
+  confess "Expected a subclass type" unless $type;
+  my $subclass = $class .'::'. ucfirst($type);
+  use_module($subclass)->new(@_)
+}
 
 
 has api_key => (
