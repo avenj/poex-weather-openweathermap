@@ -16,7 +16,11 @@ use POEx::Weather::OpenWeatherMap::Units qw/
 
 sub lazy_for {
   my $type = shift;
-  ( lazy => 1, is => 'ro', isa => $type, coerce => 1, @_ )
+  ( 
+    lazy => 1, is => 'ro', isa => $type, 
+    ( $type->has_coercion ? (coerce => 1) : () ), 
+    @_ 
+  )
 }
 
 
@@ -100,7 +104,7 @@ has conditions_terse => ( lazy_for Str,
   },
 );
 
-has conditions_description => ( lazy_for Str,
+has conditions_verbose => ( lazy_for Str,
   builder   => sub {
     my ($self) = @_;
     my $weather = $self->_so_weather_maybe || return '';
@@ -125,12 +129,12 @@ has conditions_icon => ( lazy_for Maybe[Str],
 );
 
 
-has wind_speed => ( lazy_for Int,
+has wind_speed_mph => ( lazy_for Int,
   builder   => sub { int( shift->data->{wind}->{speed} // 0 ) },
 );
 
 has wind_speed_kph => ( lazy_for Int,
-  builder   => sub { int( mph_to_kph shift->wind_speed ) },
+  builder   => sub { int( mph_to_kph shift->wind_speed_mph ) },
 );
 
 has wind_direction_degrees => ( lazy_for StrictNum,
@@ -141,17 +145,17 @@ has wind_direction => ( lazy_for Str,
   builder   => sub { deg_to_compass( shift->wind_direction_degrees ) },
 );
 
-has wind_gust => ( lazy_for Int,
+has wind_gust_mph => ( lazy_for Int,
   builder   => sub {
     my ($self) = @_;
     my $gust = int( $self->data->{wind}->{gust} // 0 );
-    return 0 unless $gust and $gust ne $self->wind_speed;
+    return 0 unless $gust and $gust ne $self->wind_speed_mph;
     $gust
   },
 );
 
 has wind_gust_kph => ( lazy_for Int,
-  builder   => sub { int( mph_to_kph shift->wind_gust ) },
+  builder   => sub { int( mph_to_kph shift->wind_gust_mph ) },
 );
 
 
