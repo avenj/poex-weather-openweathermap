@@ -66,7 +66,6 @@ sub _start {
   $_[HEAP]->{wx} = POEx::Weather::OpenWeatherMap->new(
     event_prefix => 'pwx_',
     api_key => getopts->api_key,
-    units   => 'imperial',
   );
   $_[HEAP]->{wx}->start;
 }

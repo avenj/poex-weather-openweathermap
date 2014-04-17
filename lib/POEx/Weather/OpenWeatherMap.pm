@@ -160,4 +160,11 @@ sub mxrp_http_response {
 
 1;
 
+
+=pod
+
+FIXME notes on using Request/Result classes outside POE
+
+=cut
+
 # vim: ts=2 sw=2 et sts=2 ft=perl
