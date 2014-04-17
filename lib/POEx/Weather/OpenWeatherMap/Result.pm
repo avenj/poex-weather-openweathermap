@@ -34,10 +34,21 @@ has json => (
 
 has data => (
   lazy      => 1,
-  isa       => HashObj
+  is        => 'ro',
+  isa       => HashObj,
   builder   => sub {
     my ($self) = @_;
     JSON::Tiny->new->decode( $self->json )
+  },
+);
+
+has response_code => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => Maybe[Int],
+  builder   => sub {
+    my ($self) = @_;
+    $self->data->{cod}
   },
 );
 
@@ -48,9 +59,7 @@ has is_success => (
   isa       => Bool,
   builder   => sub {
     my ($self) = @_;
-    my $data = $self->data;
-    my $code = $data->{cod} // '';
-    $code eq '200'
+    ($self->response_code // '') eq '200'
   },
 );
 
