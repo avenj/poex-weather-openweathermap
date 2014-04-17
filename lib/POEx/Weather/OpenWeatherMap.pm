@@ -6,11 +6,8 @@ use feature 'state';
 
 use Try::Tiny;
 
-use Lowu;   # autoboxed lists
 use List::Objects::Types -all;
 use Types::Standard      -all;
-
-use HTTP::Request;
 
 use POE;
 use POE::Component::Client::HTTP;
@@ -26,9 +23,12 @@ with 'MooX::Role::POE::Emitter';
 
 
 has api_key => (
-  required    => 1,
+  lazy        => 1,
   is          => 'ro',
   isa         => Str,
+  writer      => 'set_api_key',
+  predicate   => 1,
+  builder     => sub { '' },
 );
 
 sub ua_alias {
@@ -107,12 +107,13 @@ sub mxrp_get_weather {
   }
 
   # FIXME request objs should be for current or forecast (subclasses?)
-
+  # FIXME request objs need api_key
   my $my_request = POEx::Weather::OpenWeatherMap::Request->new(%args);
 
   # FIXME caching
 
   $kernel->post( $self->ua_alias => request => http_response =>
+    # FIXME ->http_request comes from request objs now
     $self->_prepare_http_request($my_request),
     $my_request
   );
@@ -121,7 +122,7 @@ sub mxrp_get_weather {
 
 sub _prepare_http_request {
   my ($self, $my_request) = @_;
-
+  # FIXME this goes away
   my $req = HTTP::Request->new( GET => $my_request->url );
   $req->header( 'x-api-key' => $self->api_key );
 
@@ -154,6 +155,7 @@ sub mxrp_response {
   );
   
   unless ($my_response->is_success) {
+    my $code = $my_response->response_code;
     $self->_emit_error(
       request => $my_request,
       status  => "OpenWeatherMap: $code: ".$my_response->error,
@@ -168,21 +170,6 @@ sub mxrp_response {
 
   $self->emit( weather => $my_response );
   # FIXME cache response
-}
-
-sub _decode_response {
-  my ($self, $raw, $my_request) = @_;
-
-  my $data = try { JSON::Tiny->new->decode($raw) } catch {
-    my $err = +{
-      request => $my_request,
-      status  => 'JSON: '.$_,
-    }->inflate;
-    $self->emit( error => $err );
-    undef
-  } or return;
-
-  $data
 }
 
 1;

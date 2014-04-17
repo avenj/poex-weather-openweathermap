@@ -71,7 +71,10 @@ has error => (
     my ($self) = @_;
     return if $self->is_success;
     my $data = $self->data;
-    $data->{message} || 'Unknown error from backend'
+    my $msg = $data->{message} || 'Unknown error from backend';
+    # there's only so much I can take ->
+    $msg = 'Not found' if $msg eq 'Not found city';
+    $msg
   },
 );
 
