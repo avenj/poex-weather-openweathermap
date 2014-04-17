@@ -31,7 +31,7 @@ sub _url_bycode {
 sub _url_bycoord {
   my $self = shift;
   my ($lat, $long) = map {; uri_escape_utf8($_) } @_;
-  "http://api.openweathermap.org/data/2.5/forecast/daily?lat=$lat&lon$long"
+  "http://api.openweathermap.org/data/2.5/forecast/daily?lat=$lat&lon=$long"
     . '&units=' . $self->_units
     . '&cnt='   . $self->days
 }

@@ -47,8 +47,6 @@ sub start {
 
         get_weather        => 'mxrp_get_weather',
         mxrp_http_response => 'mxrp_http_response',
-
-        # FIXME cache check/expiry timer
       },
 
       ( $self->has_object_states ? $self->object_states->all : () ),
@@ -112,8 +110,6 @@ sub mxrp_get_weather {
       %args
   );
 
-  # FIXME cache retrieval
-
   $kernel->post( $self->ua_alias => request => mxrp_http_response =>
     $my_request->http_request,
     $my_request
@@ -155,7 +151,6 @@ sub mxrp_http_response {
   }
 
   $self->emit( weather => $my_response );
-  # FIXME cache response
 }
 
 1;
