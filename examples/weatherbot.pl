@@ -109,32 +109,28 @@ sub pwx_error {
 sub pwx_weather {
   my $res = $_[ARG0];
 
-  my $data = $res->weather;
-  my $req  = $res->request;
+  my $place = $res->name;
 
-  my $place = $data->{name};
+  my $tempf = $res->temp_f;
+  my $tempc = $res->temp_c;
+  my $humid = $res->humidity;
+
+  my $wind    = $res->wind_speed_mph;
+  my $gust    = $res->wind_gust_mph;
+  my $winddir = $res->wind_direction;
   
-  # FIXME sanity checks belong in lib
-  my $main = $data->{main};
-  my $temp = int $main->{temp};
-  my $temp_lo = int( $main->{temp_min} // $temp);
-  my $temp_hi = int( $main->{temp_max} // $temp);
-  my $humid   = $main->{humidity};
+  my $terse   = $res->conditions_terse;
+  my $verbose = $res->conditions_verbose;
 
-  my $wind_now  = $data->{wind}->{speed};
-  my $wind_gust = $data->{wind}->{gust} // $wind_now;
+  my $hms = $res->dt->hms;
 
-  my $weather = shift @{ $data->{weather} // [] };
-  my $desc = $weather ? $weather->{description} : undef;
-  $desc = 'unknown conditions' unless defined $desc;
+  my $str = "$place - $hms (UTC) - ${tempf}F/${tempc}C";
+  $str .= " and ${humid}% humid;";
+  $str .= " wind is ${wind}mph $winddir";
+  $str .= " gusting to ${gust}mph" if $gust;
+  $str .= ". Current conditions: ${terse}: $verbose";
 
-  my $str = 
-    "($place) ${temp}F (${temp_lo}F/${temp_hi}F lo/hi)"
-    . " ${humid}% humid; wind ${wind_now}mph gusting to ${wind_gust}mph"
-    . " ($desc)"
-  ;
-
-  my $chan = $req->tag;
+  my $chan = $res->request->tag;
   $_[HEAP]->{irc}->privmsg($chan => $str);
 }
 
