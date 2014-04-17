@@ -22,6 +22,21 @@ my $Opts = +{
   api_key  => undef,
   channels => '',
   cmd      => '.wx',
+
+  help => sub {
+    say $_ for (
+      "Usage:",
+      "",
+      "  --api-key=KEY",
+      "",
+      "  --nickname=NICKNAME",
+      "  --username=USERNAME",
+      "  --server=ADDR",
+      "  --channels=CHAN[,CHAN ..]",
+      "  --cmd=CMD",
+    );
+    exit 0
+  },
 };
 GetOptions( $Opts,
   'nickname=s',
@@ -30,6 +45,8 @@ GetOptions( $Opts,
   'api_key=s',
   'channels=s',
   'cmd=s',
+
+  'help',
 );
 
 sub getopts { 
@@ -68,12 +85,14 @@ sub _start {
     api_key => getopts->api_key,
   );
   $_[HEAP]->{wx}->start;
+
+  $_[HEAP] = hash(%{ $_[HEAP] })->inflate;
 }
 
 
 
 sub pxi_irc_001 {
-  $_[HEAP]->{irc}->join( getopts->channels->all )
+  $_[HEAP]->irc->join( getopts->channels->all )
 }
 
 sub pxi_irc_public_msg {
@@ -84,7 +103,7 @@ sub pxi_irc_public_msg {
   if ( index($string, "$cmd ") == 0 ) {
     my $location = substr $string, length("$cmd ");
 
-    $_[HEAP]->{wx}->get_weather(
+    $_[HEAP]->wx->get_weather(
       location => $location,
       tag      => $target,
     );
@@ -100,7 +119,7 @@ sub pwx_error {
 
   if ($req->{tag}) {
     my $chan = $req->{tag};
-    $_[HEAP]->{irc}->privmsg($chan => "Err: $status");
+    $_[HEAP]->irc->privmsg($chan => "Err: $status");
   }
   warn "Err: $status";
 }
@@ -123,14 +142,14 @@ sub pwx_weather {
 
   my $hms = $res->dt->hms;
 
-  my $str = "$place - $hms (UTC) - ${tempf}F/${tempc}C";
-  $str .= " and ${humid}% humid;";
+  my $str = "$place at ${hms}UTC: ${tempf}F/${tempc}C";
+  $str .= " and ${humid}% humidity;";
   $str .= " wind is ${wind}mph $winddir";
   $str .= " gusting to ${gust}mph" if $gust;
   $str .= ". Current conditions: ${terse}: $verbose";
 
   my $chan = $res->request->tag;
-  $_[HEAP]->{irc}->privmsg($chan => $str);
+  $_[HEAP]->irc->privmsg($chan => $str);
 }
 
 POE::Kernel->run
