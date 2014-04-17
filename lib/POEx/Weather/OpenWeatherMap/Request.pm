@@ -10,7 +10,11 @@ use Types::DateTime -all;
 use HTTP::Request;
 use URI::Escape 'uri_escape_utf8';
 
+use Module::Runtime 'use_module';
+
+
 use Moo; use MooX::late;
+
 
 sub new_for {
   my ($class, $type) = splice @_, 0, 2;
