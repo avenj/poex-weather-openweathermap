@@ -31,15 +31,6 @@ has api_key => (
   isa         => Str,
 );
 
-has units => (
-  ## FIXME feed me to Requests
-  lazy        => 1,
-  is          => 'ro',
-  writer      => 'set_units',
-  isa         => Str,
-  builder     => sub { 'imperial' },
-);
-
 sub ua_alias {
   my ($self) = @_;
   $self->alias ? $self->alias . 'UA' : ()
