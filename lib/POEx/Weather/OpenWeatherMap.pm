@@ -45,8 +45,8 @@ sub start {
         emitter_started  => 'mxrp_emitter_started',
         emitter_stopped  => 'mxrp_emitter_stopped',
 
-        get_weather      => 'mxrp_get_weather',
-        http_response    => 'mxrp_response',
+        get_weather        => 'mxrp_get_weather',
+        mxrp_http_response => 'mxrp_http_response',
 
         # FIXME cache check/expiry timer
       },
@@ -95,9 +95,10 @@ sub mxrp_get_weather {
 
   unless ($args{location}) {
     warn "Missing 'location =>' in query\n";
-    my $fake_req = POEx::Weather::OpenWeatherMap::Request->new(
-      tag      => $args{tag},
-      location => '',
+    my $fake_req = POEx::Weather::OpenWeatherMap::Request->new_for(
+      Current =>
+        tag      => $args{tag},
+        location => '',
     );
     $self->_emit_error(
       request => $fake_req,
@@ -106,33 +107,23 @@ sub mxrp_get_weather {
     return
   }
 
-  # FIXME request objs should be for current or forecast (subclasses?)
-  # FIXME request objs need api_key
-  my $my_request = POEx::Weather::OpenWeatherMap::Request->new(%args);
+  my $my_request = POEx::Weather::OpenWeatherMap::Request->new_for(
+    Current =>
+      ( length $self->api_key ? (api_key => $self->api_key) : () ),
+      %args
+  );
 
-  # FIXME caching
+  # FIXME cache retrieval
 
-  $kernel->post( $self->ua_alias => request => http_response =>
-    # FIXME ->http_request comes from request objs now
-    $self->_prepare_http_request($my_request),
+  $kernel->post( $self->ua_alias => request => mxrp_http_response =>
+    $my_request->http_request,
     $my_request
   );
 }
 
 
-sub _prepare_http_request {
-  my ($self, $my_request) = @_;
-  # FIXME this goes away
-  my $req = HTTP::Request->new( GET => $my_request->url );
-  $req->header( 'x-api-key' => $self->api_key );
-
-  $req
-}
-
-sub mxrp_response {
+sub mxrp_http_response {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
-
-  ## FIXME OO API
 
   ## FIXME handle forecast or regular resp
   ##  dispatch to appropriate response handler
@@ -149,9 +140,10 @@ sub mxrp_response {
   }
 
   my $content = $http_response->content;
-  my $my_response = POEx::Weather::OpenWeatherMap::Result->new(
-    request => $my_request,
-    json    => $content,
+  my $my_response = POEx::Weather::OpenWeatherMap::Result->new_for(
+    Current =>
+      request => $my_request,
+      json    => $content,
   );
   
   unless ($my_response->is_success) {
@@ -162,11 +154,6 @@ sub mxrp_response {
     );
     return
   }
-
-  ## FIXME
-  ## http://bugs.openweathermap.org/projects/api/wiki/Weather_Data
-  ##   try to add some sanity wrt optional values
-  ##   maybe an actual class for these:
 
   $self->emit( weather => $my_response );
   # FIXME cache response
