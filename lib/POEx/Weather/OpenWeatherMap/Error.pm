@@ -5,9 +5,10 @@ use strictures 1;
 use Types::Standard -all;
 
 use Moo; use MooX::late;
-
-## FIXME stringy overload?
-## FIXME separate 'phase' or whatever
+use overload
+  bool => sub { 1 },
+  '""' => sub { shift->status },
+  fallback => 1;
 
 has request => (
   required  => 1,
