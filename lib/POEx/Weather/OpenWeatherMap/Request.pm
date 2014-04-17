@@ -4,10 +4,21 @@ use strictures 1;
 use v5.10;
 
 use Types::Standard -all;
+use Types::DateTime -all;
 
+use HTTP::Request;
 use URI::Escape 'uri_escape_utf8';
 
 use Moo; use MooX::late;
+
+
+has api_key => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => Str,
+  predicate => 1,
+  builder   => sub { '' },
+);
 
 
 has tag => (
@@ -24,6 +35,7 @@ has location => (
   isa       => Str,
 );
 
+
 has ts => (
   is        => 'ro',
   isa       => StrictNum,
@@ -31,10 +43,24 @@ has ts => (
 );
 
 has url => (
+  init_arg  => undef,
   lazy      => 1,
   is        => 'ro',
   isa       => Str,
   builder   => sub { shift->_parse_location_str },
+);
+
+has http_request => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => InstanceOf['HTTP::Request'],
+  builder   => sub {
+    my ($self) = @_;
+    my $req = HTTP::Request->new( GET => $self->url );
+    $req->header( 'x-api-key' => $self->api_key )
+      if $self->has_api_key and length $self->api_key;
+    $req
+  },
 );
 
 
