@@ -24,13 +24,6 @@ has location => (
   isa       => Str,
 );
 
-has units => (
-  required => 1,
-  is       => 'ro',
-  isa      => Str,
-  builder  => sub { 'imperial' },
-);
-
 has ts => (
   is        => 'ro',
   isa       => StrictNum,
@@ -45,25 +38,33 @@ has url => (
 );
 
 
+has _units => (
+  required => 1,
+  is       => 'ro',
+  isa      => Str,
+  builder  => sub { 'imperial' },
+);
+
+
 sub _url_bycode {
   my ($self, $code) = @_;
   'http://api.openweathermap.org/data/2.5/weather?id='
     . uri_escape_utf8($code)
-    . '&units=' . $self->units
+    . '&units=' . $self->_units
 }
 
 sub _url_bycoord {
   my $self = shift;
   my ($lat, $long) = map {; uri_escape_utf8($_) } @_;
   "http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long"
-    . '&units=' . $self->units
+    . '&units=' . $self->_units
 }
 
 sub _url_byname {
   my ($self, @parts) = @_;
   'http://api.openweathermap.org/data/2.5/weather?q='
     . join(',', map {; uri_escape_utf8($_) } @parts)
-    . '&units=' . $self->units
+    . '&units=' . $self->_units
 }
 
 
