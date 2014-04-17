@@ -36,6 +36,7 @@ has data => (
   lazy      => 1,
   is        => 'ro',
   isa       => HashObj,
+  coerce    => 1,
   builder   => sub {
     my ($self) = @_;
     JSON::Tiny->new->decode( $self->json )
