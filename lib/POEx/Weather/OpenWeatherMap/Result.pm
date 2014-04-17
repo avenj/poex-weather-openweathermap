@@ -70,7 +70,7 @@ has error => (
   isa       => Str,
   builder   => sub {
     my ($self) = @_;
-    return if $self->is_success;
+    return '' if $self->is_success;
     my $data = $self->data;
     my $msg = $data->{message} || 'Unknown error from backend';
     # there's only so much I can take ->
