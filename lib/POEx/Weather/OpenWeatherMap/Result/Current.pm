@@ -16,7 +16,7 @@ use POEx::Weather::OpenWeatherMap::Units qw/
 
 sub lazy_for {
   my $type = shift;
-  ( lazy => 1, is => 'ro', isa => $type, @_ )
+  ( lazy => 1, is => 'ro', isa => $type, coerce => 1, @_ )
 }
 
 
