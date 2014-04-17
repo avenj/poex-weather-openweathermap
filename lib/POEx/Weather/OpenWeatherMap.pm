@@ -63,11 +63,10 @@ sub stop {
 }
 
 sub _emit_error {
-  my ($self, %args) = @_;
-  $args{request} = $args{request}->inflate if is_HashRef($args{request});
-  $self->emit( error => 
-    POEx::Weather::OpenWeatherMap::Error->new(%args)
-  )
+  my $self = shift;
+  my $err = POEx::Weather::OpenWeatherMap::Error->new(@_);
+  $self->emit( error => $err );
+  $err
 }
 
 
