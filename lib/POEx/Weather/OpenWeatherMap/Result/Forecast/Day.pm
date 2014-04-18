@@ -81,8 +81,12 @@ has wind_direction_degrees => (
 
 has temp => (
   is        => 'ro',
-  isa       =>
-    InstanceOf['POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps'],
+  isa       => Object->plus_coercions( HashRef,
+    sub { 
+      POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps->new(%$_)
+    },
+  ),
+  coerce    => 1,
   builder   => sub {
     POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps->new
   },
@@ -112,7 +116,7 @@ has temp_min_c => (
   builder   => sub { f_to_c shift->temp_min_f },
 );
 
-has temp_min_f => (
+has temp_max_c => (
   lazy      => 1,
   is        => 'ro',
   isa       => $CoercedInt,

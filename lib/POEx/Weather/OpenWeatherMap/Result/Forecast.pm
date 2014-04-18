@@ -50,7 +50,7 @@ has _forecast_list => ( lazy_for ArrayObj,
   builder => sub { 
     my @list = @{ shift->data->{list} || [] };
     [ map {;
-      ref %$_ eq 'HASH' ?
+      ref $_ eq 'HASH' ?
         POEx::Weather::OpenWeatherMap::Result::Forecast::Day->new(%$_)
         : carp "expected a HASH but got $_"
     } @list ]
