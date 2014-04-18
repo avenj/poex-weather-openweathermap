@@ -82,10 +82,11 @@ has wind_direction_degrees => (
 
 has temp => (
   is        => 'ro',
-  isa       => Object->plus_coercions( HashRef,
-    sub { 
-      POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps->new(%$_)
-    },
+  isa       => (InstanceOf[__PACKAGE__.'::Temps'])
+    ->plus_coercions( HashRef,
+      sub { 
+        POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps->new(%$_)
+      },
   ),
   coerce    => 1,
   builder   => sub {

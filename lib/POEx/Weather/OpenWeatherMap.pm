@@ -122,9 +122,6 @@ sub mxrp_get_weather {
 sub mxrp_http_response {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
-  ## FIXME handle forecast or regular resp
-  ##  dispatch to appropriate response handler
-
   my ($http_request, $my_request) = @{ $_[ARG0] };
   my ($http_response)             = @{ $_[ARG1] };
 
@@ -138,13 +135,21 @@ sub mxrp_http_response {
 
   state $base = 'POEx::Weather::OpenWeatherMap::Request::';
   my ($type, $event);
-  if ($my_request->isa($base.'Current')) {
-    $type  = 'Current';
-    $event = 'weather';
-  } elsif ($my_request->isa($base.'Forecast')) {
-    $type  = 'Forecast';
-    $event = 'forecast';
-  }
+  CLASS: {
+    if ($my_request->isa($base.'Current')) {
+      $type  = 'Current';
+      $event = 'weather';
+      last CLASS
+    }
+    
+    if ($my_request->isa($base.'Forecast')) {
+      $type  = 'Forecast';
+      $event = 'forecast';
+      last CLASS
+    }
+
+    confess "Unknown request type: $my_request"
+  } # CLASS
 
   my $content = $http_response->content;
   my $my_response = POEx::Weather::OpenWeatherMap::Result->new_for(
