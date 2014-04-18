@@ -67,6 +67,7 @@ POE::Session->create(
       
       pwx_error
       pwx_weather
+      pwx_forecast
     /],
   ],
 );
@@ -101,11 +102,18 @@ sub pxi_irc_public_msg {
   
   my $cmd = getopts->cmd;
   if ( index($string, "$cmd ") == 0 ) {
-    my $location = substr $string, length("$cmd ");
+    my ($location, $fcast);
+    if (index($string, 'forecast') == length($cmd)+1) {
+      $location = substr $string, length($cmd) + length('forecast') + 2;
+      $fcast++
+    }
+
+    $location ||= substr $string, length("$cmd ");
 
     $_[HEAP]->wx->get_weather(
       location => $location,
       tag      => $target,
+      ( $fcast ? (forecast => 1, days => 3) : () ),
     );
   }
 }
@@ -150,6 +158,41 @@ sub pwx_weather {
 
   my $chan = $res->request->tag;
   $_[HEAP]->irc->privmsg($chan => $str);
+}
+
+
+sub pwx_forecast {
+  my $res = $_[ARG0];
+  my $chan = $res->request->tag;
+
+  my $place = $res->name;
+
+  $_[HEAP]->irc->privmsg($chan =>
+    "Forecast for $place ->"
+  );
+
+  my $itr = $res->iter;
+  while (my $day = $itr->()) {
+    my $date = $day->dt->mdy;
+    
+    my $temp_hi_f = $day->temp_max_f;
+    my $temp_lo_f = $day->temp_min_f;
+    my $temp_hi_c = $day->temp_max_c;
+    my $temp_lo_c = $day->temp_min_c;
+
+    my $terse   = $day->conditions_terse;
+    my $verbose = $day->conditions_verbose;
+
+    my $wind    = $day->wind_speed_mph;
+    my $winddir = $day->wind_direction;
+    
+    my $str = "${date}: High of ${temp_hi_f}F/${temp_hi_c}C";
+    $str .= ", low of ${temp_lo_f}F/${temp_lo_c}C";
+    $str .= ", wind $winddir at ${wind}mph";
+    $str .= "; $terse: $verbose";
+    
+    $_[HEAP]->irc->privmsg($chan => $str);
+  }
 }
 
 POE::Kernel->run
