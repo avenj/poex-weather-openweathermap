@@ -104,8 +104,10 @@ sub mxrp_get_weather {
     return
   }
 
+  my $type = $args{forecast} ? 'Forecast' : 'Current';
+
   my $my_request = POEx::Weather::OpenWeatherMap::Request->new_for(
-    Current =>
+    $type =>
       ( length $self->api_key ? (api_key => $self->api_key) : () ),
       %args
   );
@@ -134,9 +136,19 @@ sub mxrp_http_response {
     return
   }
 
+  state $base = 'POEx::Weather::OpenWeatherMap::Request::';
+  my ($type, $event);
+  if ($my_request->isa($base.'Current')) {
+    $type  = 'Current';
+    $event = 'weather';
+  } elsif ($my_request->isa($base.'Forecast')) {
+    $type  = 'Forecast';
+    $event = 'forecast';
+  }
+
   my $content = $http_response->content;
   my $my_response = POEx::Weather::OpenWeatherMap::Result->new_for(
-    Current =>
+    $type =>
       request => $my_request,
       json    => $content,
   );
@@ -150,7 +162,9 @@ sub mxrp_http_response {
     return
   }
 
-  $self->emit( weather => $my_response );
+  $self->emit( 
+    $event => $my_response 
+  );
 }
 
 1;
