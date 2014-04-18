@@ -33,6 +33,7 @@ has humidity => (
 );
 
 has cloud_coverage => (
+  init_arg  => 'clouds',
   is        => 'ro',
   isa       => $CoercedInt,
   coerce    => 1,
