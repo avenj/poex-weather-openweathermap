@@ -74,7 +74,7 @@ has error => (
     my $data = $self->data;
     my $msg = $data->{message} || 'Unknown error from backend';
     # there's only so much I can take ->
-    $msg = 'Not found' if $msg eq 'Not found city';
+    $msg = 'Not found' if $msg =~ /Not found city/;
     $msg
   },
 );
