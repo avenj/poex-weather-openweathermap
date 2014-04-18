@@ -71,16 +71,20 @@ has wind_direction_degrees => (
   builder   => sub { 0 },
 );
 
-
+{ package
+    POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps;
+  use strict; use warnings FATAL => 'all';
+  use Moo;
+  has [qw/ morn night eve min max day /], 
+    ( is => 'ro', default => sub { 0 } );
+}
 
 has temp => (
   is        => 'ro',
-  isa       => InflatedHash,
-  coerce    => 1,
+  isa       =>
+    InstanceOf['POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps'],
   builder   => sub {
-    +{
-      morn => 0, night => 0, eve => 0, min => 0, max => 0, day => 0
-    }
+    POEx::Weather::OpenWeatherMap::Result::Forecast::Day::Temps->new
   },
 );
 
