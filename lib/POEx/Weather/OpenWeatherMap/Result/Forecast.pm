@@ -57,7 +57,17 @@ has _forecast_list => ( lazy_for ArrayObj,
   },
 );
 
-## FIXME Day objects for each item in _forecast_list
+sub list {
+  my ($self) = @_;
+  $self->_forecast_list->all
+}
+
+sub iter {
+  my ($self) = @_;
+  $self->_forecast_list->natatime(1)
+}
+
+## FIXME interface to _forecast_list
 
 
 1;
