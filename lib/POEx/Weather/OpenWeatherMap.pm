@@ -4,13 +4,10 @@ use v5.10;
 use strictures 1;
 use Carp;
 
-use Try::Tiny;
-
 use List::Objects::Types -all;
 use Types::Standard      -all;
 
-use POE;
-use POE::Component::Client::HTTP;
+use POE 'Component::Client::HTTP';
 
 use POEx::Weather::OpenWeatherMap::Error;
 use POEx::Weather::OpenWeatherMap::Request;
@@ -221,8 +218,8 @@ POEx::Weather::OpenWeatherMap - POE-enabled OpenWeatherMap client
     
     # Create and start emitter:
     my $wx = POEx::Weather::OpenWeatherMap->new(
-      event_prefix => 'pwx_',
       api_key      => $api_key,
+      event_prefix => 'pwx_',
     );
 
     $heap->{wx} = $wx;
@@ -282,7 +279,9 @@ for more on OpenWeatherMap itself.
 
 =head3 api_key
 
-FIXME link to register url
+Your L<OpenWeatherMap|http://www.openweathermap.org> API key.
+
+(See L<http://www.openweathermap.org/api> to register for free.)
 
 =head2 METHODS
 

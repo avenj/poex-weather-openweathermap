@@ -23,6 +23,8 @@ my $result = POEx::Weather::OpenWeatherMap::Result->new_for(
     json    => $response->content,
 );
 
+die $result->error unless $result->is_success;
+
 my $place = $result->name;
 my $temp  = $result->temp_f;
 my $wind  = $result->wind_speed_mph;
