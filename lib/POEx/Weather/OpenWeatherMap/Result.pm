@@ -98,45 +98,66 @@ POEx::Weather::OpenWeatherMap::Result - Weather lookup result superclass
 
 =head1 DESCRIPTION
 
-This is the base class for L<POEx::Weather::OpenWeatherMap> weather results.
+This is the parent class for L<POEx::Weather::OpenWeatherMap> weather results.
 
-Also see L<POEx::Weather::OpenWeatherMap::Result::Current> and
-L<POEx::Weather::OpenWeatherMap::Result::Forecast>.
+See also:
 
-=head2 data
+L<POEx::Weather::OpenWeatherMap::Result::Current>
+
+L<POEx::Weather::OpenWeatherMap::Result::Forecast>
+
+=head2 ATTRIBUTES
+
+=head3 data
 
 This is the decoded hash from the attached L</json>. 
 
 Subclasses provide more convenient accessors for retrieving desired
 information.
 
-=head2 error
+=head3 error
 
 The error message received from the OpenWeatherMap backend (or the empty
 string if there was no error).
 
 Also see L</is_success>, L</response_code>
 
-=head2 is_success
+=head3 is_success
 
 Returns boolean true if the OpenWeatherMap backend returned a successful
 response.
 
 Also see L</error>, L</response_code>
 
-=head2 json
+=head3 json
 
 The raw JSON this Result was created with.
 
-=head2 response_code
+=head3 response_code
 
 The response code from OpenWeatherMap.
 
 Also see L</is_success>, L</error>
 
-=head2 request
+=head3 request
 
 The original request that was attached to this result.
+
+=head2 METHODS
+
+=head3 new_for
+
+Factory method; returns a new object belonging to the appropriate subclass:
+
+  my $result = POEx::Weather::OpenWeatherMap::Result->new_for(
+    Forecast =>
+      request => $orig_request,
+      json    => $raw_json,
+  );
+
+=head1 SEE ALSO
+
+FIXME
 
 =head1 AUTHOR
 

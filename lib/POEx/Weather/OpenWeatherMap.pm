@@ -47,8 +47,8 @@ sub start {
         emitter_started  => 'mxrp_emitter_started',
         emitter_stopped  => 'mxrp_emitter_stopped',
 
-        get_weather        => 'mxrp_get_weather',
-        mxrp_http_response => 'mxrp_http_response',
+        get_weather        => 'ext_get_weather',
+        ext_http_response  => 'ext_http_response',
       },
 
       ( $self->has_object_states ? $self->object_states->all : () ),
@@ -86,7 +86,7 @@ sub get_weather {
   $self->yield(get_weather => @_)
 }
 
-sub mxrp_get_weather {
+sub ext_get_weather {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
 
@@ -122,14 +122,14 @@ sub mxrp_get_weather {
     )
   }
 
-  $kernel->post( $self->_ua_alias => request => mxrp_http_response =>
+  $kernel->post( $self->_ua_alias => request => ext_http_response =>
     $my_request->http_request,
     $my_request
   );
 }
 
 
-sub mxrp_http_response {
+sub ext_http_response {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
   return if $self->_in_shutdown;
