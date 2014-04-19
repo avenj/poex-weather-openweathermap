@@ -67,7 +67,95 @@ sub iter {
   $self->_forecast_list->natatime(1)
 }
 
-## FIXME interface to _forecast_list
-
 
 1;
+
+=pod
+
+=head1 NAME
+
+POEx::Weather::OpenWeatherMap::Result::Forecast - Weather forecast result
+
+=head1 SYNOPSIS
+
+  # Normally retrieved via POEx::Weather::OpenWeatherMap
+
+=head1 DESCRIPTION
+
+This is a subclass of L<POEx::Weather::OpenWeatherMap::Result>.
+
+=head2 ATTRIBUTES
+
+=head3 count
+
+The number of forecasts (days) as returned by the L<OpenWeatherMap
+API|http://www.openweathermap.org/api>.
+
+See L</list> and L</iter>.
+
+=head3 country
+
+The country string.
+
+=head3 id
+
+The L<OpenWeatherMap|http://www.openweathermap.org/> city code.
+
+=head3 latitude
+
+The station's latitude.
+
+=head3 longitude
+
+The station's longitude.
+
+=head3 name
+
+The city name.
+
+=head2 METHODS
+
+=head3 list
+
+The full forecast list; each item in the list is a
+L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day> instance:
+
+  for my $day ($result->list) {
+    my $date = $day->dt->mdy;
+    my $cloudiness = $day->cloud_coverage;
+    # ...
+  }
+
+See the documentation for
+L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day>.
+
+=head3 iter
+
+Returns an iterator that, when called, returns the next
+L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day> instance (or undef
+when the list is empty):
+
+  my $iter = $result->iter;
+  while (my $day = $iter->()) {
+    my $wind = $day->wind_speed_mph;
+    # ...
+  }
+
+See the documentation for
+L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day>.
+
+See also: L</list>
+
+=head1 SEE ALSO
+
+L<POEx::Weather::OpenWeatherMap>
+
+L<POEx::Weather::OpenWeatherMap::Result>
+
+L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day>
+
+=head1 AUTHOR
+
+Jon Portnoy <avenj@cobaltirc.org>
+
+=cut
