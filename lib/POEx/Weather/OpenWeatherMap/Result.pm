@@ -120,14 +120,14 @@ information.
 The error message received from the OpenWeatherMap backend (or the empty
 string if there was no error).
 
-Also see L</is_success>, L</response_code>
+See also: L</is_success>, L</response_code>
 
 =head3 is_success
 
 Returns boolean true if the OpenWeatherMap backend returned a successful
 response.
 
-Also see L</error>, L</response_code>
+See also: L</error>, L</response_code>
 
 =head3 json
 
@@ -137,7 +137,7 @@ The raw JSON this Result was created with.
 
 The response code from OpenWeatherMap.
 
-Also see L</is_success>, L</error>
+See also: L</is_success>, L</error>
 
 =head3 request
 
@@ -157,7 +157,13 @@ Factory method; returns a new object belonging to the appropriate subclass:
 
 =head1 SEE ALSO
 
-FIXME
+L<http://www.openweathermap.org>
+
+L<POEx::Weather::OpenWeatherMap>
+
+L<POEx::Weather::OpenWeatherMap::Result::Current>
+
+L<POEx::Weather::OpenWeatherMap::Result::Forecast>
 
 =head1 AUTHOR
 

@@ -225,25 +225,7 @@ The forecast humidity, as a percentage.
 
 =head4 pressure
 
-The forecast barometric pressure.
-
-=head3 Wind
-
-=head4 wind_speed_mph
-
-The forecast wind speed, in MPH.
-
-=head4 wind_speed_kph
-
-The forecast wind speed, in KPH.
-
-=head4 wind_direction
-
-The forecast wind direction, as a compass direction.
-
-=head4 wind_direction_degrees
-
-The forecast wind direction, in degrees azimuth.
+The forecast atmospheric pressure, in hPa.
 
 =head3 Temperature
 
@@ -270,13 +252,36 @@ The forecast low temperature, in degrees Celsius.
 
 The forecast high temperature, in degrees Celsius.
 
+=head3 Wind
+
+=head4 wind_speed_mph
+
+The forecast wind speed, in MPH.
+
+=head4 wind_speed_kph
+
+The forecast wind speed, in KPH.
+
+=head4 wind_direction
+
+The forecast wind direction, as a (inter-)cardinal direction in the set
+C<< [ N NNE NE ENE E ESE SE SSE S SSW SW WSW W WNW NW NNW ] >>
+
+=head4 wind_direction_degrees
+
+The forecast wind direction, in degrees azimuth.
+
 =head1 SEE ALSO
+
+L<http://www.openweathermap.org>
 
 L<POEx::Weather::OpenWeatherMap>
 
 L<POEx::Weather::OpenWeatherMap::Result>
 
 L<POEx::Weather::OpenWeatherMap::Result::Forecast>
+
+L<POEx::Weather::OpenWeatherMap::Result::Current>
 
 =head1 AUTHOR
 

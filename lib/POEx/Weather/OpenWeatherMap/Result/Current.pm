@@ -158,6 +158,144 @@ has wind_gust_kph => ( lazy_for Int,
   builder   => sub { int( mph_to_kph shift->wind_gust_mph ) },
 );
 
-
-
 1;
+
+=pod
+
+=head1 NAME
+
+POEx::Weather::OpenWeatherMap::Result::Current - Weather conditions result
+
+=head1 SYNOPSIS
+
+  # Normally retrieved via POEx::Weather::OpenWeatherMap
+
+=head1 DESCRIPTION
+
+This is a subclass of L<POEx::Weather::OpenWeatherMap::Result> containing the
+result of a completed L<POEx::Weather::OpenWeatherMap::Current>.
+
+These are normally emitted by a L<POEx::Weather::OpenWeatherMap> instance.
+
+=head2 ATTRIBUTES
+
+=head3 Station
+
+=head4 country
+
+The country string.
+
+=head4 dt
+
+  my $reported_at = $result->dt->hms;
+
+A UTC L<DateTime> object representing the time this report was updated.
+
+=head4 id
+
+The L<OpenWeatherMap|http://www.openweathermap.org/> city code.
+
+=head4 latitude
+
+The station's latitude.
+
+=head4 longitude
+
+The station's longitude.
+
+=head4 name
+
+The returned city name.
+
+=head3 Conditions
+
+=head4 cloud_coverage
+
+The cloud coverage as a percentage.
+
+=head4 conditions_code
+
+The L<OpenWeatherMap|http://www.openweathermap.org/> conditions code.[
+
+=head4 conditions_icon
+
+The L<OpenWeatherMap|http://www.openweathermap.org/> conditions icon.
+
+=head4 conditions_terse
+
+The conditions category.
+
+=head4 conditions_verbose
+
+The conditions description string.
+
+=head4 humidity
+
+Current humidity.
+
+=head4 pressure
+
+Atmospheric pressure in hPa.
+
+=head4 sunrise
+
+A UTC L<DateTime> object representing sunrise time.
+
+=head4 sunset
+
+A UTC L<DateTime> object representing sunset time.
+
+=head3 Temperature
+
+=head4 temp_f
+
+Temperature in degrees Fahrenheit.
+
+=head4 temp_c
+
+Temperature in degrees Celsius.
+
+=head3 Wind
+
+=head4 wind_speed_mph
+
+Wind speed in MPH.
+
+=head4 wind_speed_kph
+
+Wind speed in KPH.
+
+=head4 wind_gust_mph
+
+Wind gust speed in MPH (or 0 if the gust speed matches L</wind_speed_mph> or
+is unavailable)
+
+=head4 wind_gust_kph
+
+Wind gust speed in KPH (or 0 if the gust speed matches L</wind_speed_kph> or
+is unavailable)
+
+=head4 wind_direction
+
+The wind direction, as a (inter-)cardinal direction in the set
+C<< [ N NNE NE ENE E ESE SE SSE S SSW SW WSW W WNW NW NNW  ] >>
+
+=head4 wind_direction_degrees
+
+The wind direction, in degrees azimuth.
+
+=head1 SEE ALSO
+
+L<http://www.openweathermap.org>
+
+L<POEx::Weather::OpenWeatherMap>
+
+L<POEx::Weather::OpenWeatherMap::Result>
+
+L<POEx::Weather::OpenWeatherMap::Result::Forecast>
+
+=head1 AUTHOR
+
+Jon Portnoy <avenj@cobaltirc.org>
+
+=cut

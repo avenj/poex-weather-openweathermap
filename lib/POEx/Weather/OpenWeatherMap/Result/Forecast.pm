@@ -82,7 +82,10 @@ POEx::Weather::OpenWeatherMap::Result::Forecast - Weather forecast result
 
 =head1 DESCRIPTION
 
-This is a subclass of L<POEx::Weather::OpenWeatherMap::Result>.
+This is a subclass of L<POEx::Weather::OpenWeatherMap::Result> containing the
+result of a completed L<POEx::Weather::OpenWeatherMap::Request::Forecast>.
+
+These are normally emitted by a L<POEx::Weather::OpenWeatherMap> instance.
 
 =head2 ATTRIBUTES
 
@@ -148,11 +151,15 @@ See also: L</list>
 
 =head1 SEE ALSO
 
+L<http://www.openweathermap.org>
+
 L<POEx::Weather::OpenWeatherMap>
 
 L<POEx::Weather::OpenWeatherMap::Result>
 
 L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day>
+
+L<POEx::Weather::OpenWeatherMap::Result::Current>
 
 =head1 AUTHOR
 
