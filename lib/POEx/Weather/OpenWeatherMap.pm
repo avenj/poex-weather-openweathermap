@@ -98,6 +98,7 @@ sub ext_get_weather {
         location => '',
     );
     $self->_emit_error(
+      source  => 'internal',
       request => $fake_req,
       status  => "Missing 'location =>' in query",
     );
@@ -139,8 +140,9 @@ sub ext_http_response {
 
   unless ($http_response->is_success) {
     $self->_emit_error(
+      source  => 'http',
       request => $my_request,
-      status  => 'HTTP: '.$http_response->status_line,
+      status  => $http_response->status_line,
     );
     return
   }
@@ -173,8 +175,9 @@ sub ext_http_response {
   unless ($my_response->is_success) {
     my $code = $my_response->response_code;
     $self->_emit_error(
+      source  => 'api',
       request => $my_request,
-      status  => "OpenWeatherMap: $code: ".$my_response->error,
+      status  => "$code: ".$my_response->error,
     );
     return
   }

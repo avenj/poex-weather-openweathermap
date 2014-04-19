@@ -12,12 +12,14 @@ my $req = POEx::Weather::OpenWeatherMap::Request->new_for(
 
 my $err = POEx::Weather::OpenWeatherMap::Error->new(
   request => $req,
+  source  => 'http',
   status  => 'died, zomg!',
 );
 
 ok $err->status eq 'died, zomg!', 'status ok';
+ok $err->source eq 'http', 'source ok';
 ok $err->request == $req, 'request ok';
 
-cmp_ok $err, 'eq', 'died, zomg!', 'stringify ok';
+cmp_ok $err, 'eq', '(HTTP) died, zomg!', 'stringify ok';
 
 done_testing

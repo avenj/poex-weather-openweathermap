@@ -117,16 +117,16 @@ sub pxi_irc_public_msg {
 
 
 sub pwx_error {
-  my $res = $_[ARG0];
+  my $err = $_[ARG0];
 
-  my $status = $res->status;
-  my $req    = $res->request;
+  my $status = $err->status;
+  my $req    = $err->request;
 
   if ($req->{tag}) {
     my $chan = $req->{tag};
-    $_[HEAP]->irc->privmsg($chan => "Err: $status");
+    $_[HEAP]->irc->privmsg($chan => "Error: $err");
   }
-  warn "Err: $status";
+  warn "Error: $err";
 }
 
 sub pwx_weather {
