@@ -174,3 +174,112 @@ has conditions_icon => (
 
 
 1;
+
+=pod
+
+=head1 NAME
+
+POEx::Weather::OpenWeatherMap::Result::Forecast::Day
+
+=head1 SYNOPSIS
+
+  # Usually retrived via a POEx::Weather::OpenWeatherMap::Result::Forecast
+
+=head1 DESCRIPTION
+
+A L<POEx::Weather::OpenWeatherMap> weather forecast for a single day.
+
+=head2 ATTRIBUTES
+
+=head3 Conditions
+
+=head4 cloud_coverage
+
+The forecast cloud coverage, as a percentage.
+
+=head4 conditions_terse
+
+The conditions category.
+
+=head4 conditions_verbose
+
+The conditions description string.
+
+=head4 conditions_code
+
+The L<OpenWeatherMap|http://www.openweathermap.org/> conditions code.
+
+=head4 conditions_icon
+
+The L<OpenWeatherMap|http://www.openweathermap.org/> conditions icon.
+
+=head4 dt
+
+  my $date = $result->dt->mdy;
+
+A L<DateTime> object coerced from the timestamp attached to this forecast.
+
+=head4 humidity
+
+The forecast humidity, as a percentage.
+
+=head4 pressure
+
+The forecast barometric pressure.
+
+=head3 Wind
+
+=head4 wind_speed_mph
+
+The forecast wind speed, in MPH.
+
+=head4 wind_speed_kph
+
+The forecast wind speed, in KPH.
+
+=head4 wind_direction
+
+The forecast wind direction, as a compass direction.
+
+=head4 wind_direction_degrees
+
+The forecast wind direction, in degrees azimuth.
+
+=head3 Temperature
+
+=head4 temp
+
+An object containing the returned temperature data; this object provides
+B<morn>, B<night>, B<eve>, B<min>, B<max>, B<day> accessors.
+
+See L</temp_min_f>, L</temp_max_f>.
+
+=head4 temp_min_f
+
+The forecast low temperature, in degrees Fahrenheit.
+
+=head4 temp_max_f
+
+The forecast high temperature, in degrees Fahrenheit.
+
+=head4 temp_min_c
+
+The forecast low temperature, in degrees Celsius.
+
+=head4 temp_max_c
+
+The forecast high temperature, in degrees Celsius.
+
+=head1 SEE ALSO
+
+L<POEx::Weather::OpenWeatherMap>
+
+L<POEx::Weather::OpenWeatherMap::Result>
+
+L<POEx::Weather::OpenWeatherMap::Result::Forecast>
+
+=head1 AUTHOR
+
+Jon Portnoy <avenj@cobaltirc.org>
+
+=cut
