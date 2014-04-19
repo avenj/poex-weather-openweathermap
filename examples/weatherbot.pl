@@ -1,13 +1,10 @@
 #!/usr/bin/env perl
 
+use v5.10;
 use strictures 1;
-use Carp;
-use 5.10.0;
 
 use List::Objects::WithUtils;
 use List::Objects::Types -all;
-
-use IRC::Toolkit;
 
 use POE;
 use POEx::Weather::OpenWeatherMap;
