@@ -9,9 +9,9 @@ use Types::Standard      -all;
 
 use POE 'Component::Client::HTTP';
 
-use POEx::Weather::OpenWeatherMap::Error;
-use POEx::Weather::OpenWeatherMap::Request;
-use POEx::Weather::OpenWeatherMap::Result;
+use Weather::OpenWeatherMap::Error;
+use Weather::OpenWeatherMap::Request;
+use Weather::OpenWeatherMap::Result;
 
 
 use Moo; use MooX::late;
@@ -65,7 +65,7 @@ sub stop {
 
 sub _emit_error {
   my $self = shift;
-  my $err = POEx::Weather::OpenWeatherMap::Error->new(@_);
+  my $err = Weather::OpenWeatherMap::Error->new(@_);
   $self->emit( error => $err );
   $err
 }
@@ -90,9 +90,10 @@ sub ext_get_weather {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
 
-  unless ($args{location}) {
+  my $location = $args{location};
+  unless ($location) {
     warn "Missing 'location =>' in query\n";
-    my $fake_req = POEx::Weather::OpenWeatherMap::Request->new_for(
+    my $fake_req = Weather::OpenWeatherMap::Request->new_for(
       Current =>
         tag      => $args{tag},
         location => '',
@@ -105,9 +106,9 @@ sub ext_get_weather {
     return
   }
 
-  my $type = $args{forecast} ? 'Forecast' : 'Current';
+  my $type = delete $args{forecast} ? 'Forecast' : 'Current';
 
-  my $my_request = POEx::Weather::OpenWeatherMap::Request->new_for(
+  my $my_request = Weather::OpenWeatherMap::Request->new_for(
     $type =>
       ( 
         $self->has_api_key && length $self->api_key ?
@@ -154,7 +155,7 @@ sub ext_http_response {
     return
   }
 
-  state $base = 'POEx::Weather::OpenWeatherMap::Request::';
+  state $base = 'Weather::OpenWeatherMap::Request::';
   my ($type, $event);
   CLASS: {
     if ($my_request->isa($base.'Current')) {
@@ -173,7 +174,7 @@ sub ext_http_response {
   } # CLASS
 
   my $content = $http_response->content;
-  my $my_response = POEx::Weather::OpenWeatherMap::Result->new_for(
+  my $my_response = Weather::OpenWeatherMap::Result->new_for(
     $type =>
       request => $my_request,
       json    => $content,
@@ -253,7 +254,7 @@ POEx::Weather::OpenWeatherMap - POE-enabled OpenWeatherMap client
 
     my $tempf = $result->temp_f;
     my $conditions = $result->conditions_verbose;
-    # (see POEx::Weather::OpenWeatherMap::Result::Current for a method list)
+    # (see Weather::OpenWeatherMap::Result::Current for a method list)
     # ...
   }
 
@@ -267,7 +268,7 @@ POEx::Weather::OpenWeatherMap - POE-enabled OpenWeatherMap client
       my $date = $day->dt->mdy;
       my $temp_hi = $day->temp_max_f;
       my $temp_lo = $day->temp_min_f;
-      # (see POEx::Weather::OpenWeatherMap::Result::Forecast)
+      # (see Weather::OpenWeatherMap::Result::Forecast)
       # ...
     }
   }
@@ -280,6 +281,9 @@ A POE-enabled interface to OpenWeatherMap (L<http://www.openweathermap.org>),
 providing an object-oriented asynchronous interface to current & forecast
 weather conditions for a given city, latitude/longitude, or OpenWeatherMap
 city code.
+
+This is really just an asynchronous counterpart to L<Weather::OpenWeatherMap>;
+look there for documentation regarding Request & Result objects.
 
 This an event emitter that consumes L<MooX::Role::POE::Emitter>; look there
 for documentation on composed methods. See L<http://www.openweathermap.org>
@@ -339,14 +343,17 @@ L<OpenWeatherMap|http://www.openweathermap.org/> city code, or a 'lat X, long
 Y' string.
 
 Requests the current weather by default (see
-L<POEx::Weather::OpenWeatherMap::Request::Current>).
+L<Weather::OpenWeatherMap::Request::Current>).
 
 If passed C<< forecast => 1 >>, requests a weather forecast (see
-L<POEx::Weather::OpenWeatherMap::Request::Forecast>), in which case C<< days
+L<Weather::OpenWeatherMap::Request::Forecast>), in which case C<< days
 => $count >> can be specified (up to 14).
 
 An optional C<< tag => >> can be specified to identify the response when it
 comes in.
+
+Any extra arguments are passed to the constructor for the appropriate Request
+subclass; see L<Weather::OpenWeatherMap::Request>.
 
 The request is made asynchronously and a response (or error) emitted when it
 is available; see L</EMITTED EVENTS>. There is no useful return value.
@@ -361,8 +368,9 @@ is available; see L</EMITTED EVENTS>. There is no useful return value.
       tag      => 'foo',
   );
 
-POE interface to the L</get_weather> method (above); see L</METHODS> for usage
-details.
+POE interface to the L</get_weather> method.
+
+See L<Weather::OpenWeatherMap/get_weather> for usage details.
 
 =head2 EMITTED EVENTS
 
@@ -371,51 +379,51 @@ details.
 Emitted when an error occurs; this may be an internal error, an HTTP error,
 or an error reported by the OpenWeatherMap API.
 
-C<$_[ARG0]> is a L<POEx::Weather::OpenWeatherMap::Error> object.
+C<$_[ARG0]> is a L<Weather::OpenWeatherMap::Error> object.
 
 =head3 weather
 
 Emitted when a request for the current weather has been successfully processed.
 
-C<$_[ARG0]> is a L<POEx::Weather::OpenWeatherMap::Result::Current> object; see
+C<$_[ARG0]> is a L<Weather::OpenWeatherMap::Result::Current> object; see
 that module's documentation for details on retrieving weather information.
 
 =head3 forecast
 
 Emitted when a request for a weather forecast has been successfully processed.
 
-C<$_[ARG0]> is a L<POEx::Weather::OpenWeatherMap::Result::Forecast> object;
+C<$_[ARG0]> is a L<Weather::OpenWeatherMap::Result::Forecast> object;
 see that module's documentation for details on retrieving per-day forecasts
-(L<POEx::Weather::OpenWeatherMap::Result::Forecast::Day> objects).
+(L<Weather::OpenWeatherMap::Result::Forecast::Day> objects).
 
 =head2 WITHOUT POE
 
 It's possible to use the Request & Result classes to construct appropriate
 HTTP requests & parse JSON responses without POE; this event emitter merely
 glues together a L<POE::Component::Client::HTTP> session &
-L<POEx::Weather::OpenWeatherMap::Request> /
-L<POEx::Weather::OpenWeatherMap::Result> objects.
+L<Weather::OpenWeatherMap::Request> /
+L<Weather::OpenWeatherMap::Result> objects.
 
 Any user agent that accepts a L<HTTP::Request> will do; see
 C<examples/using_lwp.pl> in this distribution for a simple example.
 
 =head1 SEE ALSO
 
-L<POEx::Weather::OpenWeatherMap::Error>
+L<Weather::OpenWeatherMap::Error>
 
-L<POEx::Weather::OpenWeatherMap::Result>
+L<Weather::OpenWeatherMap::Result>
 
-L<POEx::Weather::OpenWeatherMap::Result::Current>
+L<Weather::OpenWeatherMap::Result::Current>
 
-L<POEx::Weather::OpenWeatherMap::Result::Forecast>
+L<Weather::OpenWeatherMap::Result::Forecast>
 
-L<POEx::Weather::OpenWeatherMap::Request>
+L<Weather::OpenWeatherMap::Request>
 
-L<POEx::Weather::OpenWeatherMap::Request::Current>
+L<Weather::OpenWeatherMap::Request::Current>
 
-L<POEx::Weather::OpenWeatherMap::Request::Forecast>
+L<Weather::OpenWeatherMap::Request::Forecast>
 
-L<POEx::Weather::OpenWeatherMap::Request::Forecast::Day>
+L<Weather::OpenWeatherMap::Request::Forecast::Day>
 
 The C<examples/> directory of this distribution.
 
