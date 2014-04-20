@@ -116,14 +116,21 @@ sub ext_get_weather {
       %args
   );
 
-  unless ( $kernel->alias_resolve($self->_ua_alias) ) {
+  $self->_issue_http_request($my_request)
+}
+
+
+sub _issue_http_request {
+  my ($self, $my_request) = @_;
+
+  unless ( $poe_kernel->alias_resolve($self->_ua_alias) ) {
     POE::Component::Client::HTTP->spawn(
       Alias           => $self->_ua_alias,
       FollowRedirects => 2,
     )
   }
 
-  $kernel->post( $self->_ua_alias => request => ext_http_response =>
+  $poe_kernel->post( $self->_ua_alias => request => ext_http_response =>
     $my_request->http_request,
     $my_request
   );

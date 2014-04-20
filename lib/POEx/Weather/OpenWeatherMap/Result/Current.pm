@@ -207,6 +207,10 @@ The station's longitude.
 
 The returned city name.
 
+=head4 station
+
+The returned station name.
+
 =head3 Conditions
 
 =head4 cloud_coverage
