@@ -207,6 +207,8 @@ sub ext_http_response {
 
 =pod
 
+=for Pod::Coverage ext_\w+ mxrp_\w+ has_\w+
+
 =head1 NAME
 
 POEx::Weather::OpenWeatherMap - POE-enabled OpenWeatherMap client
@@ -424,8 +426,6 @@ L<Weather::OpenWeatherMap::Request>
 L<Weather::OpenWeatherMap::Request::Current>
 
 L<Weather::OpenWeatherMap::Request::Forecast>
-
-L<Weather::OpenWeatherMap::Request::Forecast::Day>
 
 The C<examples/> directory of this distribution.
 
