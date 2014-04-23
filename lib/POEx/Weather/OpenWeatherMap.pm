@@ -94,7 +94,7 @@ sub get_weather {
 }
 
 sub ext_get_weather {
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
+  my $self = $_[OBJECT];
   my %args = @_[ARG0 .. $#_];
 
   my $location = $args{location};
@@ -146,12 +146,12 @@ sub _issue_http_request {
 
 
 sub ext_http_response {
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
+  my $self = $_[OBJECT];
 
   return if $self->_in_shutdown;
 
-  my ($http_request, $my_request) = @{ $_[ARG0] };
-  my ($http_response)             = @{ $_[ARG1] };
+  my (undef, $my_request) = @{ $_[ARG0] };
+  my ($http_response)     = @{ $_[ARG1] };
 
   unless ($http_response->is_success) {
     $self->_emit_error(
