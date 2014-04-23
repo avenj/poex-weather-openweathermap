@@ -163,11 +163,12 @@ sub pwx_forecast {
 
   my $place = $res->name;
 
+  my $chan = $res->request->tag;
+
   $_[HEAP]->irc->privmsg($chan =>
     "Forecast for $place ->"
   );
 
-  my $chan = $res->request->tag;
   my $itr = $res->iter;
   while (my $day = $itr->()) {
     my $date = $day->dt->day_name;
