@@ -84,7 +84,7 @@ sub mxrp_emitter_started {
 
 sub mxrp_emitter_stopped {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
-  $kernel->post( $self->_ua_alias => 'shutdown' )
+  $kernel->call( $self->_ua_alias => 'shutdown' )
     if $kernel->alias_resolve( $self->_ua_alias );
 }
 
