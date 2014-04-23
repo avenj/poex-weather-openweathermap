@@ -170,7 +170,7 @@ sub pwx_forecast {
 
   my $itr = $res->iter;
   while (my $day = $itr->()) {
-    my $date = $day->dt->mdy;
+    my $date = $day->dt->day_name;
     
     my $temp_hi_f = $day->temp_max_f;
     my $temp_lo_f = $day->temp_min_f;
