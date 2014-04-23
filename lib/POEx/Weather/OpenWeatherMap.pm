@@ -32,10 +32,17 @@ has _in_shutdown => (
   default     => sub { 0 },
 );
 
-sub _ua_alias {
-  my ($self) = @_;
-  $self->alias ? $self->alias . 'UA' : ()
-}
+has _ua_alias => (
+  lazy        => 1,
+  init_arg    => 'ua_alias',
+  is          => 'ro',
+  isa         => Str,
+  builder     => sub {
+    my ($self) = @_;
+    $self->alias ? $self->alias . 'UA'
+      : confess "Cannot build ua_alias; emitter not running"
+  },
+);
 
 
 sub start {
@@ -206,7 +213,6 @@ POEx::Weather::OpenWeatherMap - POE-enabled OpenWeatherMap client
 
 =head1 SYNOPSIS
 
-  
   use POE;
   use POEx::Weather::OpenWeatherMap;
 
@@ -235,6 +241,12 @@ POEx::Weather::OpenWeatherMap - POE-enabled OpenWeatherMap client
 
     $heap->{wx} = $wx;
     $wx->start;
+
+    ## An example request:
+    $wx->get_weather(
+      location => 'Manchester, NH',
+      tag      => 'mytag',
+    );
   }
 
   sub pwx_error {
@@ -368,9 +380,8 @@ is available; see L</EMITTED EVENTS>. There is no useful return value.
       tag      => 'foo',
   );
 
-POE interface to the L</get_weather> method.
-
-See L<Weather::OpenWeatherMap/get_weather> for usage details.
+POE interface to the L</get_weather> method; see L</METHODS> for available
+options.
 
 =head2 EMITTED EVENTS
 
@@ -396,18 +407,9 @@ C<$_[ARG0]> is a L<Weather::OpenWeatherMap::Result::Forecast> object;
 see that module's documentation for details on retrieving per-day forecasts
 (L<Weather::OpenWeatherMap::Result::Forecast::Day> objects).
 
-=head2 WITHOUT POE
-
-It's possible to use the Request & Result classes to construct appropriate
-HTTP requests & parse JSON responses without POE; this event emitter merely
-glues together a L<POE::Component::Client::HTTP> session &
-L<Weather::OpenWeatherMap::Request> /
-L<Weather::OpenWeatherMap::Result> objects.
-
-Any user agent that accepts a L<HTTP::Request> will do; see
-C<examples/using_lwp.pl> in this distribution for a simple example.
-
 =head1 SEE ALSO
+
+L<Weather::OpenWeatherMap>
 
 L<Weather::OpenWeatherMap::Error>
 
