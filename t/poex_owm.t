@@ -87,7 +87,7 @@ POE::Session->create(
     check_if_done => sub {
       my $done = keys %$expected == keys %$got ? 1 : 0;
       $_[HEAP]->{secs}++;
-      if ($_[HEAP]->{secs} == 90) {
+      if ($_[HEAP]->{secs} == 180) {
         $_[HEAP]->{wx}->stop;
         $done++;
         fail "Timed out"
