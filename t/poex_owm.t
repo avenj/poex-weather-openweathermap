@@ -36,7 +36,6 @@ my $got = +{};
 my $expected = +{
   'current weather ok'  => 1,
   'forecast weather ok' => 1,
-  'error ok'            => 1,
 };
 
 POE::Session->create(
@@ -63,9 +62,6 @@ POE::Session->create(
         days     => 3,
       );
 
-      # pwx_error
-      $_[HEAP]->{wx}->get_weather;
-
       $_[HEAP]->{secs} = 0;
       $_[KERNEL]->delay( check_if_done => 1 );
     },
@@ -80,14 +76,10 @@ POE::Session->create(
         if $res->name eq 'Manchester'
         and $res->isa('Weather::OpenWeatherMap::Result::Forecast');
     },
-    pwx_error => sub {
-      my $err = $_[ARG0];
-      $got->{'error ok'}++
-    },
     check_if_done => sub {
       my $done = keys %$expected == keys %$got ? 1 : 0;
       $_[HEAP]->{secs}++;
-      if ($_[HEAP]->{secs} == 180) {
+      if ($_[HEAP]->{secs} == 60) {
         $_[HEAP]->{wx}->stop;
         $done++;
         fail "Timed out"
