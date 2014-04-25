@@ -18,7 +18,7 @@ my $mocked_response = 0;
         my ($post_to, $http_req, $my_req) = @_[ARG0 .. $#_];
 
         my $http_response = mock_http_ua->request($http_req);
-        $poe_kernel->post( $_[SENDER], $post_to,
+        $poe_kernel->call( $_[SENDER], $post_to,
           [ $http_req, $my_req ],
           [ $http_response ],
         );
@@ -41,7 +41,7 @@ my $expected = +{
   'got error'           => 1,
 };
 
-alarm 300;
+alarm 120;
 POE::Session->create(
   inline_states => +{
     _start => sub {
