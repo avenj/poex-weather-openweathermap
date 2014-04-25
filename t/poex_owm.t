@@ -41,7 +41,7 @@ my $expected = +{
   'got error'           => 1,
 };
 
-alarm 60;
+alarm 300;
 POE::Session->create(
   inline_states => +{
     _start => sub {
