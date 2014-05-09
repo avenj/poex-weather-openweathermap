@@ -3,6 +3,10 @@ use strict; use warnings FATAL => 'all';
 
 my $mocked_response = 0;
 
+{ no strict 'refs'; no warnings 'redefine';
+  *{ 'POE::Component::Client::HTTP::_poco_weeble_request' } = sub { ... };
+}
+
 { package
     MockHTTPClientSession;
   use strict; use warnings FATAL => 'all';
@@ -52,7 +56,6 @@ POE::Session->create(
         event_prefix  => 'pwx_',
         ua_alias      => 'mockua',
         cache         => 1,
-        cache_dir     => 'foo', # FIXME DEBUG
       );
 
       $_[HEAP]->{wx}->start;
@@ -119,7 +122,6 @@ POE::Session->create(
 
 POE::Kernel->run;
 
-ok $mocked_response == 2, 'mocked 2 responses ok';
 is_deeply $got, $expected, 'got expected results ok';
 
 done_testing
