@@ -167,7 +167,6 @@ sub ext_get_weather {
       %args
   );
 
-  #warn "DEBUG ". $self->_cache->make_path($my_request);
   if ($self->cache && (my $cached = $self->_cache->retrieve($my_request)) ) {
     my $obj = $cached->object;
     my (undef, $event) = $self->_result_type($my_request);
