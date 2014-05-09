@@ -36,21 +36,23 @@ use POEx::Weather::OpenWeatherMap;
 
 my $got = +{};
 my $expected = +{
-  'current weather ok'  => 1,
-  'forecast weather ok' => 1,
+  'current weather ok'  => 2,
+  'forecast weather ok' => 2,
   'got error'           => 1,
 };
 
-alarm 120;
+alarm 60;
 POE::Session->create(
   inline_states => +{
     _start => sub {
       $_[KERNEL]->sig(ALRM => 'time_out');
 
       $_[HEAP]->{wx} = POEx::Weather::OpenWeatherMap->new(
-        api_key => 'foo',
-        event_prefix => 'pwx_',
-        ua_alias => 'mockua',
+        api_key       => 'foo',
+        event_prefix  => 'pwx_',
+        ua_alias      => 'mockua',
+        cache         => 1,
+        cache_dir     => 'foo', # FIXME DEBUG
       );
 
       $_[HEAP]->{wx}->start;
@@ -62,14 +64,14 @@ POE::Session->create(
       $_[HEAP]->{wx}->get_weather(
         location => 'Manchester, NH',
         tag      => 'mytag',
-      );
+      ) for 1 .. 2;
 
       # pwx_forecast
       $_[HEAP]->{wx}->get_weather(
         location => 'Manchester, NH',
         forecast => 1,
         days     => 3,
-      );
+      ) for 1 .. 2;
 
       # pwx_error
       $_[HEAP]->{wx}->get_weather;
@@ -102,7 +104,13 @@ POE::Session->create(
     },
 
     check_if_done => sub {
-      my $done = keys(%$expected) == keys(%$got) ? 1 : 0;
+      my $done;
+      if (keys %$expected == keys %$got) {
+        $done = 1;
+        for my $key (keys %$expected) {
+          $done = 0 unless $expected->{$key} == $got->{$key}
+        }
+      }
       $_[HEAP]->{wx}->stop if $done;
       $_[KERNEL]->delay( check_if_done => 1 ) unless $done;
     },
