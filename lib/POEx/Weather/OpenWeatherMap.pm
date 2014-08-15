@@ -419,6 +419,9 @@ If passed C<< forecast => 1 >>, requests a weather forecast (see
 L<Weather::OpenWeatherMap::Request::Forecast>), in which case C<< days
 => $count >> can be specified (up to 14).
 
+If passed C<< find => 1 >>, requests search results for a given location name
+or latitude & longitude; see L<Weather::OpenWeatherMap::Request::Find>.
+
 An optional C<< tag => >> can be specified to identify the response when it
 comes in.
 
