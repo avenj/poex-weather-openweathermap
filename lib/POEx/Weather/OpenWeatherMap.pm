@@ -10,10 +10,12 @@ use Weather::OpenWeatherMap::Error;
 use Weather::OpenWeatherMap::Request;
 use Weather::OpenWeatherMap::Request::Current;
 use Weather::OpenWeatherMap::Request::Forecast;
+use Weather::OpenWeatherMap::Request::Find;
 
 use Weather::OpenWeatherMap::Result;
 use Weather::OpenWeatherMap::Result::Current;
 use Weather::OpenWeatherMap::Result::Forecast;
+use Weather::OpenWeatherMap::Request::Find;
 
 
 use Moo; use MooX::late;
@@ -156,7 +158,10 @@ sub ext_get_weather {
     return
   }
 
-  my $type = delete $args{forecast} ? 'Forecast' : 'Current';
+  my $type = 
+      delete $args{forecast} ? 'Forecast' 
+    : delete $args{find}     ? 'Find'
+    : 'Current';
 
   my $my_request = Weather::OpenWeatherMap::Request->new_for(
     $type =>
