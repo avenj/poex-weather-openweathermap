@@ -24,7 +24,7 @@ my $Opts = +{
     say $_ for (
       "Usage:",
       "",
-      "  --api-key=KEY",
+      "  --api_key=KEY",
       "",
       "  --nickname=NICKNAME",
       "  --username=USERNAME",
@@ -61,6 +61,7 @@ POE::Session->create(
 
       pxi_irc_001
       pxi_irc_public_msg
+      pxi_irc_disconnected
       
       pwx_error
       pwx_weather
@@ -87,7 +88,9 @@ sub _start {
   $_[HEAP] = hash(%{ $_[HEAP] })->inflate;
 }
 
-
+sub pxi_irc_disconnected {
+  $_[HEAP]->irc->connect
+}
 
 sub pxi_irc_001 {
   $_[HEAP]->irc->join( getopts->channels->all )
