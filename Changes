@@ -1,5 +1,11 @@
 Revision history for Perl module POEx-Weather-OpenWeatherMap
 
+0.002002 2015-12-28
+
+  - examples/ fixes
+
+  - Depend on newer Weather::OpenWeatherMap for hourly forecast support
+
 0.002001 2014-08-16
 
   - Support 'find' requests

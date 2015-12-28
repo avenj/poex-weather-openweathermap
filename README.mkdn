@@ -168,7 +168,9 @@ Requests the current weather by default (see
 
 If passed `forecast => 1`, requests a weather forecast (see
 [Weather::OpenWeatherMap::Request::Forecast](https://metacpan.org/pod/Weather::OpenWeatherMap::Request::Forecast)), in which case `days
-&#x3d;> $count` can be specified (up to 14).
+&#x3d;> $count` can be specified (up to 14). If `hourly => 1` is also
+specified, an hourly (rather than daily) report is returned; see
+the documentation for [Weather::OpenWeatherMap](https://metacpan.org/pod/Weather::OpenWeatherMap) for details.
 
 If passed `find => 1`, requests search results for a given location name
 or latitude & longitude; see [Weather::OpenWeatherMap::Request::Find](https://metacpan.org/pod/Weather::OpenWeatherMap::Request::Find).
@@ -216,8 +218,10 @@ that module's documentation for details on retrieving weather information.
 Emitted when a request for a weather forecast has been successfully processed.
 
 `$_[ARG0]` is a [Weather::OpenWeatherMap::Result::Forecast](https://metacpan.org/pod/Weather::OpenWeatherMap::Result::Forecast) object;
-see that module's documentation for details on retrieving per-day forecasts
-([Weather::OpenWeatherMap::Result::Forecast::Day](https://metacpan.org/pod/Weather::OpenWeatherMap::Result::Forecast::Day) objects).
+see that module's documentation for details on retrieving daily or hourly forecasts
+([Weather::OpenWeatherMap::Result::Forecast::Day](https://metacpan.org/pod/Weather::OpenWeatherMap::Result::Forecast::Day) &
+[Weather::OpenWeatherMap::Result::Forecast::Hour](https://metacpan.org/pod/Weather::OpenWeatherMap::Result::Forecast::Hour) objects) from the retrieved
+forecast.
 
 # SEE ALSO
 
