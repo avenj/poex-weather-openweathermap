@@ -42,6 +42,7 @@ my $got = +{};
 my $expected = +{
   'current weather ok'  => 2,
   'forecast weather ok' => 2,
+  'hourly forecast ok'  => 2,
   'got error'           => 1,
 };
 
@@ -75,6 +76,11 @@ POE::Session->create(
         forecast => 1,
         days     => 3,
       ) for 1 .. 2;
+      $_[HEAP]->{wx}->get_weather(
+        location => 'Moscow, Russia',
+        forecast => 1,
+        hourly   => 1,
+      ) for 1 .. 2;
 
       # pwx_error
       $_[HEAP]->{wx}->get_weather;
@@ -90,9 +96,15 @@ POE::Session->create(
 
     pwx_forecast => sub {
       my $res = $_[ARG0];
-      $got->{'forecast weather ok'}++
-        if $res->name eq 'Manchester'
-        and $res->isa('Weather::OpenWeatherMap::Result::Forecast');
+      if ($res->hourly) {
+        $got->{'hourly forecast ok'}++
+          if $res->name eq 'Moscow'
+            and $res->isa('Weather::OpenWeatherMap::Result::Forecast')
+      } else {
+        $got->{'forecast weather ok'}++
+          if $res->name eq 'Manchester'
+          and $res->isa('Weather::OpenWeatherMap::Result::Forecast')
+      }
     },
 
     pwx_error => sub {
