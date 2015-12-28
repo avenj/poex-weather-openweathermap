@@ -417,7 +417,9 @@ L<Weather::OpenWeatherMap::Request::Current>).
 
 If passed C<< forecast => 1 >>, requests a weather forecast (see
 L<Weather::OpenWeatherMap::Request::Forecast>), in which case C<< days
-=> $count >> can be specified (up to 14).
+=> $count >> can be specified (up to 14). If C<< hourly => 1 >> is also
+specified, an hourly (rather than daily) report is returned; see
+the documentation for L<Weather::OpenWeatherMap> for details.
 
 If passed C<< find => 1 >>, requests search results for a given location name
 or latitude & longitude; see L<Weather::OpenWeatherMap::Request::Find>.
@@ -465,8 +467,10 @@ that module's documentation for details on retrieving weather information.
 Emitted when a request for a weather forecast has been successfully processed.
 
 C<$_[ARG0]> is a L<Weather::OpenWeatherMap::Result::Forecast> object;
-see that module's documentation for details on retrieving per-day forecasts
-(L<Weather::OpenWeatherMap::Result::Forecast::Day> objects).
+see that module's documentation for details on retrieving daily or hourly forecasts
+(L<Weather::OpenWeatherMap::Result::Forecast::Day> &
+L<Weather::OpenWeatherMap::Result::Forecast::Hour> objects) from the retrieved
+forecast.
 
 =head1 SEE ALSO
 
