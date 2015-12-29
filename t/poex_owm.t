@@ -59,6 +59,18 @@ POE::Session->create(
         cache         => 1,
       );
 
+      cmp_ok $_[HEAP]->{wx}->api_key, 'eq', 'foo',
+        'api_key';
+      $_[HEAP]->{wx}->set_api_key('bar');
+      cmp_ok $_[HEAP]->{wx}->api_key, 'eq', 'bar',
+        'set_api_key';
+
+      ok $_[HEAP]->{wx}->cache, 'cache';
+      ok !defined $_[HEAP]->{wx}->cache_dir,
+        'cache_dir defaults to undef';
+      ok !defined $_[HEAP]->{wx}->cache_expiry,
+        'cache_expiry defaults to undef';
+
       $_[HEAP]->{wx}->start;
       $_[KERNEL]->yield('issue_tests');
     },

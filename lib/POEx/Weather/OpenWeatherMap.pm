@@ -27,6 +27,7 @@ has api_key => (
   is          => 'ro',
   isa         => Str,
   predicate   => 1,
+  writer      => 'set_api_key',
   builder     => sub { '' },
 );
 
@@ -252,7 +253,7 @@ sub ext_http_response {
 
 =pod
 
-=for Pod::Coverage ext_\w+ mxrp_\w+ has_\w+
+=for Pod::Coverage ext_\w+ mxrp_\w+ has_\w+ set_api_key
 
 =head1 NAME
 
@@ -356,6 +357,9 @@ for more on OpenWeatherMap itself.
 Your L<OpenWeatherMap|http://www.openweathermap.org> API key.
 
 (See L<http://www.openweathermap.org/api> to register for free.)
+
+C<api_key> can be set after object construction via B<set_api_key>; if the key
+is not valid, requests will likely fail with C<< 401 Unauthorized >> errors.
 
 =head3 cache
 
