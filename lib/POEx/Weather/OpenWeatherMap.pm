@@ -110,6 +110,13 @@ sub mxrp_emitter_started {
 
 sub mxrp_emitter_stopped {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
+  # expire stale cache items before we stop if we have a persistent cache_dir;
+  # elsewise clear cache entirely:
+  if (defined $self->cache_dir) {
+    $self->_cache->expire_all
+  } else {
+    $self->_cache->clear
+  }
   $kernel->call( $self->_ua_alias => 'shutdown' )
     if $kernel->alias_resolve( $self->_ua_alias );
 }
