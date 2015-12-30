@@ -28,7 +28,10 @@ has api_key => (
   isa         => Str,
   predicate   => 1,
   writer      => 'set_api_key',
-  builder     => sub { '' },
+  builder     => sub {
+    carp "No api_key specified, requests will likely fail!";
+    ''
+  },
 );
 
 has _ua_alias => (
