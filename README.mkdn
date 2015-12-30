@@ -101,6 +101,9 @@ Your [OpenWeatherMap](http://www.openweathermap.org) API key.
 
 (See [http://www.openweathermap.org/api](http://www.openweathermap.org/api) to register for free.)
 
+`api_key` can be set after object construction via **set\_api\_key**; if the key
+is not valid, requests will likely fail with `401 Unauthorized` errors.
+
 ### cache
 
 A boolean value indicating whether successful results should be cached to disk
