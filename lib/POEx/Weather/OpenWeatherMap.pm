@@ -23,7 +23,6 @@ with 'MooX::Role::POE::Emitter';
 
 
 has api_key => (
-  lazy        => 1,
   is          => 'ro',
   isa         => Str,
   predicate   => 1,
