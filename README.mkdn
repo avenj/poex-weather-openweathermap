@@ -248,4 +248,4 @@ The `examples/` directory of this distribution.
 
 # AUTHOR
 
-Jon Portnoy <avenj@cobaltirc.org>
+Jon Portnoy &lt;avenj@cobaltirc.org>
