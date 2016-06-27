@@ -18,7 +18,7 @@ use Weather::OpenWeatherMap::Result::Forecast;
 use Weather::OpenWeatherMap::Request::Find;
 
 
-use Moo; use MooX::late;
+use Moo;
 with 'MooX::Role::POE::Emitter';
 
 
